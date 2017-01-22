@@ -1,6 +1,6 @@
 <resources>
 
-    <style name="AppTheme" parent="Theme.AppCompat">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar" >
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -18,6 +18,29 @@
 
     <style name="StockSymbolTextStyle">
         <item name="android:textSize">25sp</item>
+        <item name="android:textColor">#FFF</item>
         <item name="android:textAllCaps">true</item>
     </style>
+
+    <style name="ChartTitleText">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">#FFF</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="DetailsLabelText">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">#FFF</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="DetailsText">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">#FFF</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
 </resources>

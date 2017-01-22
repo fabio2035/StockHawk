@@ -59,7 +59,6 @@ public class AddStockDialog extends DialogFragment {
         if (window != null) {
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         }
-
         return dialog;
     }
 
@@ -70,6 +69,4 @@ public class AddStockDialog extends DialogFragment {
         }
         dismissAllowingStateLoss();
     }
-
-
 }

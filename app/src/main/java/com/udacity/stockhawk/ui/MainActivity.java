@@ -1,7 +1,9 @@
 package com.udacity.stockhawk.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,10 +43,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @BindView(R.id.error)
     TextView error;
     private StockAdapter adapter;
+    private Context ctx;
 
     @Override
     public void onClick(String symbol) {
+
         Timber.d("Symbol clicked: %s", symbol);
+        Toast.makeText(ctx, "Symbol chosen: " + symbol, Toast.LENGTH_LONG).show();
+
+        Intent intent = new Intent(this, StockDetailActivity.class).setData(Contract.Quote.makeUriForStock(symbol));
+        startActivity(intent);
     }
 
     @Override
@@ -52,6 +61,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        Toolbar tool = (Toolbar) findViewById(R.id.toolbar);
+        tool.setTitle(R.string.app_name);
+        tool.setTitleTextColor(Color.WHITE);
+        tool.setLogo(R.mipmap.ic_launcher);
 
         adapter = new StockAdapter(this, this);
         stockRecyclerView.setAdapter(adapter);
@@ -63,6 +77,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         QuoteSyncJob.initialize(this);
         getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
+
+        ctx = this;
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
@@ -77,8 +93,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 getContentResolver().delete(Contract.Quote.makeUriForStock(symbol), null, null);
             }
         }).attachToRecyclerView(stockRecyclerView);
-
-
     }
 
     private boolean networkUp() {
@@ -126,6 +140,15 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
             PrefUtils.addStock(this, symbol);
             QuoteSyncJob.syncImmediately(this);
+            @QuoteSyncJob.StockStatus int status = PrefUtils.getStockStatus(this);
+            switch (status){
+                case QuoteSyncJob.STOCK_STATUS_OK:
+                    //todo: add something here..
+                    break;
+                case QuoteSyncJob.STOCK_STATUS_INVALID:
+                    Toast.makeText(this, "This stock isn't valid!!!" , Toast.LENGTH_LONG).show();
+                    break;
+            }
         }
     }
 

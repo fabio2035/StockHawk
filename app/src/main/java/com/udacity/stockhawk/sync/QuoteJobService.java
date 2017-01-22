@@ -12,7 +12,7 @@ public class QuoteJobService extends JobService {
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
         Timber.d("Intent handled");
-        Intent nowIntent = new Intent(getApplicationContext(), QuoteIntentService.class);
+        Intent nowIntent = new Intent(getApplicationContext(), QuoteSyncService.class);
         getApplicationContext().startService(nowIntent);
         return true;
     }

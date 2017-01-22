@@ -1,10 +1,12 @@
-<resources>
+<resources xmlns:xliff="http://schemas.android.com/tools">
     <string name="app_name">Stock Hawk</string>
 
     <string name="pref_stocks_initialized_key" translatable="false">initialized</string>
 
     <string name="pref_stocks_key">stocks</string>
 
+    <!-- Key name for storing stock status in SharedPreferences -->
+    <string name="pref_stock_status_key" translatable="false">stock-status</string>
 
     <string name="pref_display_mode_key">displayMode</string>
     <string name="pref_display_mode_default">@string/pref_display_mode_percentage_key</string>
@@ -12,10 +14,10 @@
     <string name="pref_display_mode_absolute_key">absolute</string>
     <string name="pref_display_mode_percentage_key">percentage</string>
 
-    <string name="default_stocks_yahoo">YHOO</string>
-    <string name="default_stocks_apple">AAPL</string>
-    <string name="default_stocks_microsoft">MSFT</string>
-    <string name="default_stocks_facebook">FB</string>
+    <string name="default_stocks_yahoo" translatable="false">YHOO</string>
+    <string name="default_stocks_apple" translatable="false">AAPL</string>
+    <string name="default_stocks_microsoft" translatable="false">MSFT</string>
+    <string name="default_stocks_facebook" translatable="false">FB</string>
 
 
     <string name="action_change_units">@string/pref_display_mode_key</string>
@@ -31,5 +33,22 @@
 
     <string name="toast_stock_added_no_connectivity">Symbol %s added. Will refresh when network available.</string>
     <string name="toast_no_connectivity">Will refresh when network available.</string>
+    <string name="title_stockdetail_fragment">Stock Details</string>
+    <string name="empty_stock_list">No Stock data available</string>
+    <string name="button_add_stock">Add Stock</string>
+
+    <!-- Content Descriptions -->
+    <string name="cont_desc_symbol">Stock Symbol:<xliff:g id="stock_symbol">%1$s</xliff:g></string>
+    <string name="sync_account_type">StockHawk.example.com</string>
+    <string name="content_authority">com.udacity.stockhawk</string>
+    <string name="stock_dividends_label">Dividends</string>
+    <string name="stock_price_label">Stock Price</string>
+    <string name="button_remove_stock">Remove Stock</string>
+    <string name="stock_variation">Stock Variation</string>
+
+
+    <!-- Strings used when displaying details of stock quote -->
+    <string name="stock_quote_toolbar_title">Stock Details for: (<xliff:g id="stock_symbol">%1$s</xliff:g>)"</string>
+
 
 </resources>

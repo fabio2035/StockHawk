@@ -7,13 +7,22 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.Manifest.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Permissions required by the sync adapter -->
+    <uses-permission
+        android:name="android.permission.READ_SYNC_SETTINGS"/>
+    <uses-permission
+        android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+    <uses-permission
+        android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+
     <application
         android:name=".StockHawkApp"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning"
+        android:supportsRtl="true">
         <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,6 +31,63 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.StockDetailActivity"
+            android:label="@string/title_stockdetail_fragment"
+            android:parentActivityName=".ui.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.udacity.stockhawk.ui.MainActivity" />
+        </activity>
+
+        <!-- New Sync service  -->
+        <!-- SyncAdapter's dummy authentication service -->
+        <service
+            android:name=".sync.QuoteAuthenticatorService"
+            >
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+        <provider
+            android:authorities="@string/content_authority"
+            android:name=".data.StockProvider"
+            android:exported="false"
+            android:syncable="true" />
+
+        <!-- The SyncAdapter service -->
+        <service
+            android:name=".sync.QuoteSyncService"
+            android:exported="true"
+            >
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+
+        <!-- end sync service -->
+
+        <!-- elements for widget functionality START -->
+        <service
+            android:name="com.udacity.stockhawk.widget.StockRemoteViewsService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+        <receiver android:name=".widget.StocksWidgetProvider" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/appwidget_info" />
+        </receiver>
+
+        <!-- elements for widget functionality END -->
+        <!--
         <service
             android:name=".sync.QuoteIntentService"
             android:exported="false" />
@@ -36,6 +102,16 @@
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name="com.udacity.stockhawk.widget.StockRemoteViewsService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+        <receiver android:name="com.udacity.stockhawk.widget.StocksWidgetProvider" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/appwidget_info" />
+        </receiver>  -->
     </application>
 
 </manifest>

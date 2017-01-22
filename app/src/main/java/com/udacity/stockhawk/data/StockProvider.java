@@ -9,6 +9,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import timber.log.Timber;
+
 
 public class StockProvider extends ContentProvider {
 
@@ -116,6 +118,9 @@ public class StockProvider extends ContentProvider {
         if (null == selection) {
             selection = "1";
         }
+
+        Timber.d("About to remove stock with uri: " + uri);
+
         switch (uriMatcher.match(uri)) {
             case QUOTE:
                 rowsDeleted = db.delete(
@@ -128,6 +133,7 @@ public class StockProvider extends ContentProvider {
 
             case QUOTE_FOR_SYMBOL:
                 String symbol = Contract.Quote.getStockFromUri(uri);
+                Timber.d("Removing symbol: " + symbol);
                 rowsDeleted = db.delete(
                         Contract.Quote.TABLE_NAME,
                         '"' + symbol + '"' + " =" + Contract.Quote.COLUMN_SYMBOL,

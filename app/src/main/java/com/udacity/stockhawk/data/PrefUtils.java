@@ -5,10 +5,13 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.udacity.stockhawk.R;
+import com.udacity.stockhawk.sync.QuoteSyncJob;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import timber.log.Timber;
 
 public final class PrefUtils {
 
@@ -23,7 +26,6 @@ public final class PrefUtils {
         HashSet<String> defaultStocks = new HashSet<>(Arrays.asList(defaultStocksList));
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
-
         boolean initialized = prefs.getBoolean(initializedKey, false);
 
         if (!initialized) {
@@ -34,7 +36,6 @@ public final class PrefUtils {
             return defaultStocks;
         }
         return prefs.getStringSet(stocksKey, new HashSet<String>());
-
     }
 
     private static void editStockPref(Context context, String symbol, Boolean add) {
@@ -45,6 +46,10 @@ public final class PrefUtils {
             stocks.add(symbol);
         } else {
             stocks.remove(symbol);
+            context.getContentResolver().delete(
+                            Contract.Quote.makeUriForStock(symbol),
+                            null,
+                            null);
         }
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -84,8 +89,15 @@ public final class PrefUtils {
         } else {
             editor.putString(key, absoluteKey);
         }
-
         editor.apply();
+    }
+
+    //todo: check why this method returns error when StockStatus isn't commented
+    @SuppressWarnings("ResoureType")
+    static public //@QuoteSyncJob.StockStatus
+    int getStockStatus(Context c){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
+        return sp.getInt(c.getString(R.string.pref_stock_status_key), QuoteSyncJob.STOCK_STATUS_UNKNOWN);
     }
 
 }

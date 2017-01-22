@@ -1,3 +1,9 @@
 <resources>
     <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="detail_horizontal_padding">@dimen/abc_list_item_padding_horizontal_material</dimen>
+    <dimen name="detail_button_width">190dp</dimen>
+    <dimen name="detail_button_height">45dp</dimen>
+    <dimen name="appbar_elevation">2dp</dimen>
+    <dimen name="detail_bottom_padding">20dp</dimen>
+
 </resources>
