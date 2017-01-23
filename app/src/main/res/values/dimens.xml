@@ -5,5 +5,6 @@
     <dimen name="detail_button_height">45dp</dimen>
     <dimen name="appbar_elevation">2dp</dimen>
     <dimen name="detail_bottom_padding">20dp</dimen>
+    <dimen name="widget_prcnt_chng_padding">3dp</dimen>
 
 </resources>

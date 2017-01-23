@@ -21,6 +21,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.IntDef;
+import android.widget.Toast;
 
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
@@ -96,15 +97,19 @@ public class QuoteSyncJob extends AbstractThreadedSyncAdapter {
                 String symbol = iterator.next();
 
                 Stock stock = quotes.get(symbol);
-                StockQuote quote = stock.getQuote();
 
-                if (quote.getPrice() == null ) {
+                Timber.d("Stock.getQuote() is: " + stock.getQuote().toString());
+
+                if (stock.getQuote().getPrice() == null ) {
+                    //Toast.makeText(context,"Chosen stock does not exist!", Toast.LENGTH_LONG).show();
                     Timber.d("quote is invalid... calling setStockStatus");
                     setStockStatus(context, STOCK_STATUS_INVALID);
                     return;
-                }
-                else
+                }else
                 {
+
+                    StockQuote quote = stock.getQuote();
+
                     float price = quote.getPrice().floatValue();
                     float change = quote.getChange().floatValue();
                     float percentChange = quote.getChangeInPercent().floatValue();
@@ -282,6 +287,7 @@ public class QuoteSyncJob extends AbstractThreadedSyncAdapter {
         SharedPreferences.Editor spe = sp.edit();
         spe.putInt(c.getString(R.string.pref_stock_status_key), stockStatus);
         spe.commit();
+        //Toast.makeText("Chosen stock does not exist!",)
     }
 
     private void updateWidgets() {

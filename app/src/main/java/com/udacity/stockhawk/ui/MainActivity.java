@@ -141,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             PrefUtils.addStock(this, symbol);
             QuoteSyncJob.syncImmediately(this);
             @QuoteSyncJob.StockStatus int status = PrefUtils.getStockStatus(this);
+
             switch (status){
                 case QuoteSyncJob.STOCK_STATUS_OK:
                     //todo: add something here..

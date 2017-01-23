@@ -46,10 +46,10 @@ public final class PrefUtils {
             stocks.add(symbol);
         } else {
             stocks.remove(symbol);
-            context.getContentResolver().delete(
+            /*context.getContentResolver().delete(
                             Contract.Quote.makeUriForStock(symbol),
                             null,
-                            null);
+                            null); */
         }
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
