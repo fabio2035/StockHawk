@@ -17,6 +17,7 @@ import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -30,6 +31,7 @@ import com.udacity.stockhawk.data.PrefUtils;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -60,6 +62,8 @@ public class QuoteSyncJob extends AbstractThreadedSyncAdapter {
     public static final int SYNC_INTERVAL = 60 * 15;
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
 
+    public static final Uri invalid_stock_uri = Contract.BASE_URI.buildUpon().appendPath("invalid").build();
+
     private Context context;
 
     @Override
@@ -80,13 +84,23 @@ public class QuoteSyncJob extends AbstractThreadedSyncAdapter {
             stockCopy.addAll(stockPref);
             String[] stockArray = stockPref.toArray(new String[stockPref.size()]);
 
-            //Timber.d(stockCopy.toString());
+            Timber.d(stockCopy.toString());
 
             if (stockArray.length == 0) {
                 return;
             }
 
-            Map<String, Stock> quotes = YahooFinance.get(stockArray);
+            Map<String, Stock> quotes = null;
+
+            try {
+                Timber.d("Trying to get yahooFinance.get(stockarrays..)");
+                quotes = YahooFinance.get(stockArray);
+            } catch (Exception e){
+                Timber.d("Exception caught: " + e.toString());
+                PrefUtils.setStockStatus(context, STOCK_STATUS_SERVER_DOWN);
+                context.getContentResolver().notifyChange(invalid_stock_uri, null, false);
+                return;
+            }
             Iterator<String> iterator = stockCopy.iterator();
 
             //.d(quotes.toString());
@@ -98,25 +112,34 @@ public class QuoteSyncJob extends AbstractThreadedSyncAdapter {
 
                 Stock stock = quotes.get(symbol);
 
-                Timber.d("Stock.getQuote() is: " + stock.getQuote().toString());
+                StockQuote quote = null;
 
-                if (stock.getQuote().getPrice() == null ) {
-                    //Toast.makeText(context,"Chosen stock does not exist!", Toast.LENGTH_LONG).show();
-                    Timber.d("quote is invalid... calling setStockStatus");
-                    setStockStatus(context, STOCK_STATUS_INVALID);
+                float price = 0; // = quote.getPrice().floatValue();
+                float change = 0; // quote.getChange().floatValue();
+                float percentChange = 0; // = quote.getChangeInPercent().floatValue();
+
+
+                try {quote = stock.getQuote();
+                    price = quote.getPrice().floatValue();
+                    change = quote.getChange().floatValue();
+                    percentChange = quote.getChangeInPercent().floatValue();
+                } catch (Exception e){
+                    Timber.d("Exception caught while stock.getQuote action.. removing stock from list.");
+                    PrefUtils.setStockStatus(context, STOCK_STATUS_INVALID);
+                    PrefUtils.removeStock(context, symbol);
+                    context.getContentResolver().notifyChange(invalid_stock_uri, null, false);
                     return;
-                }else
-                {
+                }
 
-                    StockQuote quote = stock.getQuote();
+                //    StockQuote quote = stock.getQuote();
 
-                    float price = quote.getPrice().floatValue();
-                    float change = quote.getChange().floatValue();
-                    float percentChange = quote.getChangeInPercent().floatValue();
+                    //float price = quote.getPrice().floatValue();
+                    //float change = quote.getChange().floatValue();
+                    //float percentChange = quote.getChangeInPercent().floatValue();
 
                     // WARNING! Don't request historical data for a stock that doesn't exist!
                     // The request will hang forever X_x
-                    // todo: check if stock exists before searching!
+                    // set positive stock status for all stocks that are O.K
                     Timber.d("quote result: " + quote);
                     List<HistoricalQuote> history = stock.getHistory(from, to, Interval.WEEKLY);
 
@@ -141,10 +164,6 @@ public class QuoteSyncJob extends AbstractThreadedSyncAdapter {
                     quoteCV.put(Contract.Quote.COLUMN_HISTORY, historyBuilder.toString());
 
                     quoteCVs.add(quoteCV);
-
-
-
-                }
 
                 context.getContentResolver()
                         .bulkInsert(
@@ -195,9 +214,6 @@ public class QuoteSyncJob extends AbstractThreadedSyncAdapter {
 
     public static synchronized void initialize(final Context context) {
         getSyncAccount(context);
-      //  schedulePeriodic(context);
-      //  syncImmediately(context);
-
     }
 
     public static Account getSyncAccount(Context context) {
@@ -282,13 +298,18 @@ public class QuoteSyncJob extends AbstractThreadedSyncAdapter {
         }
     }*/
 
-    static private void setStockStatus(Context c, @StockStatus int stockStatus){
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
-        SharedPreferences.Editor spe = sp.edit();
-        spe.putInt(c.getString(R.string.pref_stock_status_key), stockStatus);
-        spe.commit();
-        //Toast.makeText("Chosen stock does not exist!",)
+
+    public static boolean stockisValid(Context ctx, String symbol) {
+        try{
+            Stock stock = YahooFinance.get(symbol);
+        } catch (Exception e){
+            Timber.d("Stock is apparently invalid..." + e);
+            PrefUtils.setStockStatus(ctx, QuoteSyncJob.STOCK_STATUS_INVALID);
+            return false;
+        }
+        return true;
     }
+
 
     private void updateWidgets() {
         Timber.d("UPDATING WIDGETS");

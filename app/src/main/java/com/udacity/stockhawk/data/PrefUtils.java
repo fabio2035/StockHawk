@@ -9,9 +9,12 @@ import com.udacity.stockhawk.sync.QuoteSyncJob;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import timber.log.Timber;
+import yahoofinance.Stock;
+import yahoofinance.YahooFinance;
 
 public final class PrefUtils {
 
@@ -41,15 +44,12 @@ public final class PrefUtils {
     private static void editStockPref(Context context, String symbol, Boolean add) {
         String key = context.getString(R.string.pref_stocks_key);
         Set<String> stocks = getStocks(context);
-
+        Timber.d("Stock set: " + stocks.toString());
         if (add) {
             stocks.add(symbol);
         } else {
             stocks.remove(symbol);
-            /*context.getContentResolver().delete(
-                            Contract.Quote.makeUriForStock(symbol),
-                            null,
-                            null); */
+            Timber.d("Stock symbol removed: " + symbol);
         }
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -57,6 +57,8 @@ public final class PrefUtils {
         editor.putStringSet(key, stocks);
         editor.apply();
     }
+
+
 
     public static void addStock(Context context, String symbol) {
         editStockPref(context, symbol, true);
@@ -98,6 +100,15 @@ public final class PrefUtils {
     int getStockStatus(Context c){
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
         return sp.getInt(c.getString(R.string.pref_stock_status_key), QuoteSyncJob.STOCK_STATUS_UNKNOWN);
+    }
+
+    static public void setStockStatus(Context c, @QuoteSyncJob.StockStatus int stockStatus){
+        Timber.d("Setting stock status" + stockStatus);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
+        SharedPreferences.Editor spe = sp.edit();
+        spe.putInt(c.getString(R.string.pref_stock_status_key), stockStatus);
+        spe.commit();
+        //Toast.makeText("Chosen stock does not exist!",)
     }
 
 }

@@ -6,10 +6,10 @@ import android.provider.BaseColumns;
 
 public final class Contract {
 
-    static final String AUTHORITY = "com.udacity.stockhawk";
+    public static final String AUTHORITY = "com.udacity.stockhawk";
     static final String PATH_QUOTE = "quote";
     static final String PATH_QUOTE_WITH_SYMBOL = "quote/*";
-    private static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
+    public static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
 
     private Contract() {
     }

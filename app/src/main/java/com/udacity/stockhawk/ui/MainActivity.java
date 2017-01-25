@@ -1,12 +1,16 @@
 package com.udacity.stockhawk.ui;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -19,6 +23,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +49,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     TextView error;
     private StockAdapter adapter;
     private Context ctx;
+
+    private ContentObserver mObserver;
 
     @Override
     public void onClick(String symbol) {
@@ -79,6 +86,30 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         getSupportLoaderManager().initLoader(STOCK_LOADER, null, this);
 
         ctx = this;
+
+        mObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
+            @Override
+            public void onChange(boolean selfChange) {
+                super.onChange(selfChange);
+                Context context = getApplicationContext();
+                @QuoteSyncJob.StockStatus int status = PrefUtils.getStockStatus(context);
+                //Timber.d("(Inside notify change)Stock status:" + status);
+
+                switch (status){
+                    case QuoteSyncJob.STOCK_STATUS_OK:
+                        //do nothing..
+                        break;
+                    case QuoteSyncJob.STOCK_STATUS_INVALID:
+                        Toast.makeText(context, "Introduced stock isn't valid!" , Toast.LENGTH_LONG).show();
+                        break;
+                    case QuoteSyncJob.STOCK_STATUS_SERVER_DOWN:
+                        Toast.makeText(context, "Server is not responding at the moment, please try again later", Toast.LENGTH_LONG).show();
+                        break;
+                }
+            }
+        };
+
+        getContentResolver().registerContentObserver(QuoteSyncJob.invalid_stock_uri, false, mObserver);
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
@@ -129,7 +160,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     void addStock(String symbol) {
+
         if (symbol != null && !symbol.isEmpty()) {
+
+            //reset stock status
+            PrefUtils.setStockStatus(this, QuoteSyncJob.STOCK_STATUS_OK);
 
             if (networkUp()) {
                 swipeRefreshLayout.setRefreshing(true);
@@ -140,16 +175,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
             PrefUtils.addStock(this, symbol);
             QuoteSyncJob.syncImmediately(this);
-            @QuoteSyncJob.StockStatus int status = PrefUtils.getStockStatus(this);
 
-            switch (status){
-                case QuoteSyncJob.STOCK_STATUS_OK:
-                    //todo: add something here..
-                    break;
-                case QuoteSyncJob.STOCK_STATUS_INVALID:
-                    Toast.makeText(this, "This stock isn't valid!!!" , Toast.LENGTH_LONG).show();
-                    break;
-            }
         }
     }
 
